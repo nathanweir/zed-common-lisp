@@ -1,0 +1,11 @@
+id = "zed-common-lisp"
+name = "Zed Common Lisp"
+version = "0.0.1"
+schema_version = 1
+authors = ["Nathan Weir <nathan.weir@protonmail.com>"]
+description = "Experimenting with making a Zed extension for Common Lisp"
+repository = "https://github.com/nathanweir/zed-common-lisp"
+
+[grammars.commonlisp]
+repository = "https://github.com/tree-sitter-grammars/tree-sitter-commonlisp"
+commit = "32323509b3d9fe96607d151c2da2c9009eb13a2f"

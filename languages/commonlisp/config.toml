@@ -1,0 +1,6 @@
+name = "Common Lisp"
+grammar = "commonlisp"
+path_suffixes = ["lisp", "cl"]
+line_comments = ["; "]
+tab_size = 4
+debuggers = ["(break)"]

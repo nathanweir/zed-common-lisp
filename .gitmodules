@@ -1,0 +1,6 @@
+[submodule "gramamrs/commonlisp"]
+	path = gramamrs/commonlisp
+	url = https://github.com/tree-sitter-grammars/tree-sitter-commonlisp
+[submodule "grammars/commonlisp"]
+	path = grammars/commonlisp
+	url = https://github.com/tree-sitter-grammars/tree-sitter-commonlisp
