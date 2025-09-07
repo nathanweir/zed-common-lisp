@@ -6,6 +6,13 @@ authors = ["Nathan Weir <nathan.weir@protonmail.com>"]
 description = "Experimenting with making a Zed extension for Common Lisp"
 repository = "https://github.com/nathanweir/zed-common-lisp"
 
+[language_servers.commonlisp-lsp]
+name = "Common Lisp LSP"
+language = "Common Lisp"
+
+#[language-servers.commonlisp-lsp.language_ids]
+#"Common Lisp" = "commonlisp"
+
 [grammars.commonlisp]
 repository = "https://github.com/tree-sitter-grammars/tree-sitter-commonlisp"
 commit = "32323509b3d9fe96607d151c2da2c9009eb13a2f"
