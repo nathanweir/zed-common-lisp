@@ -1,3 +1,3 @@
-(list_lit
-  (open: (lparen) @open)
-  (close: (rparen) @close))
+("(" @open ")" @close)
+; Can't do until adding the [ & ] nodes
+; ("[" @open "]" @close)
