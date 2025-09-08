@@ -1,23 +1,49 @@
-;; Outline query for Zed
+;; TODO: Revisit
 
-;; Function/macro/generic/method definitions
-(
-  (defun
-    (defun_header
-      function_name: [(sym_lit) (package_lit)] @name
-      .
-      (_)*)
-    @item
-  )
-)
+; ;; Package definitions
+; (defpackage_form
+;   (name: (_) @name)
+;   (operator: (_) @context))
 
-;; Docstring as annotation (if present as first value in defun)
-;; Doesn't quite work, but I think I'm just not using the outliner correctly?
-(
-  (defun
-    (defun_header
-      function_name: [(sym_lit) (package_lit)] @name)
-    value: (str_lit) @annotation
-    @item
-  )
-)
+; (in_package_form
+;   (name: (_) @name)
+;   (operator: (_) @context))
+
+; ;; Function definitions
+; (defun_form
+;   (name: (_) @name)
+;   (parameters: (_) @context)
+;   (body: (_) @item)
+;   (operator: (_) @context.extra))
+
+; ;; Let bindings
+; (let_form
+;   (bindings: (_) @context)
+;   (body: (_) @item)
+;   (operator: (_) @context.extra))
+
+; (let_star_form
+;   (bindings: (_) @context)
+;   (body: (_) @item)
+;   (operator: (_) @context.extra))
+
+; ;; Handler-case
+; (handler_case_form
+;   (protected_form: (_) @context)
+;   (handler: (_) @item)
+;   (operator: (_) @context.extra))
+
+; ;; Handler clause (nested in handler-case)
+; (handler_clause
+;   (condition: (_) @context)
+;   (lambda_list: (_) @context.extra)
+;   (body: (_) @item))
+
+; ;; Arithmetic forms
+; (arithmetic_form
+;   (operator: (_) @name)
+;   (operand: (_) @item))
+
+; ;; Comments as annotations
+; (line_comment) @annotation
+; (block_comment) @annotation

@@ -35,8 +35,6 @@
       1
       (* n (factorial (1- n)))))
 
-(factorial )
-
 (defun fibonacci (n &optional (a 0) (b 1))
   "Calculate nth Fibonacci number with optional tail recursion"
   (cond ((zerop n) a)
@@ -213,6 +211,8 @@
                  (format t "~A -> ~A~%" k v))
              ht)
     ht))
+
+(getha)
 
 ;;; Input/Output and format strings
 (defun io-examples ()
