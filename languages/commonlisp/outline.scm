@@ -1,49 +1,56 @@
-;; TODO: Revisit
+;; Functions
+(defun
+  (fn_name) @name
+  (documentation)? @annotation
+) @item
 
-; ;; Package definitions
-; (defpackage_form
-;   (name: (_) @name)
-;   (operator: (_) @context))
+;; Macros
+(defmacro
+  (_symbol) @name
+  (documentation)? @annotation
+) @item
 
-; (in_package_form
-;   (name: (_) @name)
-;   (operator: (_) @context))
+(defmethod
+  (fn_name) @name
+  (documentation)? @annotation
+) @item
 
-; ;; Function definitions
-; (defun_form
-;   (name: (_) @name)
-;   (parameters: (_) @context)
-;   (body: (_) @item)
-;   (operator: (_) @context.extra))
+(defgeneric
+  (fn_name) @name
+  (documentation)? @annotation
+) @item
 
-; ;; Let bindings
-; (let_form
-;   (bindings: (_) @context)
-;   (body: (_) @item)
-;   (operator: (_) @context.extra))
+;; Variables/constants
+(defvar
+  (_symbol) @name
+  (documentation)? @annotation
+) @item
 
-; (let_star_form
-;   (bindings: (_) @context)
-;   (body: (_) @item)
-;   (operator: (_) @context.extra))
+(defparameter
+  (_symbol) @name
+  (documentation)? @annotation
+) @item
 
-; ;; Handler-case
-; (handler_case_form
-;   (protected_form: (_) @context)
-;   (handler: (_) @item)
-;   (operator: (_) @context.extra))
+(defconstant
+  (_symbol) @name
+  (documentation)? @annotation
+) @item
 
-; ;; Handler clause (nested in handler-case)
-; (handler_clause
-;   (condition: (_) @context)
-;   (lambda_list: (_) @context.extra)
-;   (body: (_) @item))
+;; Classes and slots
+(defclass
+  (_symbol) @name
+  (superclass_list) @context
+  (slot_list
+    (slot
+      (symbol) @context.extra
+    )*
+  )
+  (documentation)? @annotation
+) @item
 
-; ;; Arithmetic forms
-; (arithmetic_form
-;   (operator: (_) @name)
-;   (operand: (_) @item))
-
-; ;; Comments as annotations
-; (line_comment) @annotation
-; (block_comment) @annotation
+;; Package definitions
+(list
+  (symbol) @_defpackage
+  (_symbol) @name
+  (#eq? @_defpackage "defpackage")
+) @item

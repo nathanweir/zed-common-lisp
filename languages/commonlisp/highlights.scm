@@ -1,67 +1,221 @@
-;; Atoms
-(symbol) @variable
-(simple_symbol) @variable
-; (package_symbol
-;  (package) @namespace
-;  (symbol) @variable)
-(escaped_symbol) @string.special.symbol
-(gensym) @variable.special
-(keyword) @attribute
-(number) @number
-(integer) @number
-(float) @number
-(ratio) @number
-(complex) @number
+;;;;; Highlight queries for tree-sitter-commonlisp
+
+;;;; Preface
+
+;;; Order of query definitions matters: queries that are specified last have
+;;; higher precedence.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+["(" ")"] @punctuation.bracket
+
 (string) @string
-(character) @string.special
-(simple_character) @string.special
-(named_character) @string.special
-(unicode_character) @string.special
-(boolean) @boolean
-(nil) @constant
+(documentation) @string
 
-;; Lists and vectors
-(list
-  "(" @punctuation.bracket
-  ")" @punctuation.bracket)
-(dotted_list
-  "(" @punctuation.bracket
-  "." @punctuation.delimiter
-  ")" @punctuation.bracket)
-(vector
-  "#(" @punctuation.special
-  ")" @punctuation.bracket)
+(number) @number
 
-;; Quote forms
-(quoted_expression
-  "'" @operator)
-(quasiquoted_expression
-  "`" @operator)
-(unquoted_expression
-  "," @operator)
-(spliced_expression
-  ",@" @operator)
+(t) @boolean
 
-;; Comments
-(line_comment) @comment
-(block_comment) @comment.doc
+(nil) @constant.builtin
 
-;; Reader macros and literals
-(bit_vector) @string.special
-(pathname) @string.special
-(array_literal) @type
-(structure_literal) @type
-(function_reference) @function
-(radix_number) @number
-(octal_number) @number
-(hex_number) @number
-(binary_number) @number
+[(pkg_symbol) (symbol)] @variable
 
-;; Lambda list
-(keyword) @keyword
-(lambda_keyword) @keyword
-(defun_keyword) @keyword
-(in_package_keyword) @keyword
-(defpackage_keyword) @keyword
-(use_keyword) @keyword
-(export_keyword) @keyword
+(keyword) @lisp.keyword
+
+[(comment) (block_comment)] @comment
+
+(character) @character
+
+;; TODO reduce scope of matched expressions
+(list . [(pkg_symbol) (symbol)] @function)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; defun
+
+(fn_name (symbol) @function)
+(fn_name "setf" @function.builtin (symbol) @function)
+
+(defun "defun" @function.macro)
+
+(defmacro
+  "defmacro" @function.macro
+  name: (symbol) @function)
+
+(defmethod "defmethod" @function.macro)
+
+(defgeneric "defgeneric" @function.macro)
+
+(method_qual) @lisp.keyword
+
+(declare
+  "declare" @lisp.special)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; defclass
+
+(defclass . "defclass" @function.macro)
+
+(defclass name: (symbol) @lisp.class)
+
+(superclass_list (symbol) @lisp.class)
+
+(slot_list (slot name: (symbol) @lisp.slot))
+
+(type . (symbol) @lisp.type)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; lambda
+
+(lambda
+  "lambda" @lisp.special)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; lambda-list
+
+(lambda_list
+  (symbol) @parameter)
+
+(optvar   . "&optional"     @keyword.lambda)
+(restvar  . "&rest"         @keyword.lambda)
+(keyvar   . "&key"          @keyword.lambda)
+(auxvar   . "&aux"          @keyword.lambda)
+(envvar   . "&environment"  @keyword.lambda)
+(wholevar . "&whole"        @keyword.lambda)
+(bodyvar  . "&body"         @keyword.lambda)
+(keyvar (allow_other_keys) @keyword.lambda .)
+
+(destr_patt (symbol) @variable)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; defvar, defparameter
+
+(defvar
+  "defvar" @function.macro
+  name: (symbol) @variable)
+
+(defparameter
+  "defparameter" @function.macro
+  name: (symbol) @variable)
+
+(defconstant
+  "defconstant" @function.macro
+  name: (symbol) @variable)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Data and Control Flow
+
+(let
+  ["let" "let*"] @lisp.special)
+
+(let_binds
+  (let_bind var: (symbol) @variable))
+
+(with_slots "with-slots" @macro.builtin)
+(slot_entry var: (symbol) @variable)
+
+(destr_bind "destructuring-bind" @macro.builtin)
+
+(list . (symbol) @macro.builtin (#match? @macro.builtin "^(.+::?)?with-slots$")
+      . (list (symbol) @variable))
+
+(labels "labels" @lisp.special)
+(flet "flet" @lisp.special)
+(macrolet "macrolet" @lisp.special)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Sharpsign
+
+;; don't touch (character)
+
+(vector . ("#" @character.special
+           . len: (number)? @character.special))
+
+(bitvector . ("#" @character.special
+              . len: (number)? @character.special
+              . "*" @character.special))
+(bits) @number
+
+(function . "#'" @character.special)
+(function . "#'" (symbol) @function)
+
+(uninterned_symbol . "#:" @character.special)
+
+(sharp_dot . "#." @character.special)
+
+(struct . ["#s" "#S"] @character.special
+        . name: (symbol) @structure
+        slot: (symbol) @field)
+
+(complex . ["#c" "#C"] @character.special)
+
+(pathname . ["#p" "#P"] @character.special)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; special characters
+
+(dot) @character.special
+
+; (package . _ . ":" @character.special)
+
+; (keyword . ":" @character.special)
+
+(quote . "'" @character.special)
+
+(backquote . "`" @character.special)
+
+(unquote . "," @character.special)
+
+(unquote_splicing . [",@" ",."] @character.special)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Miscellaneous
+
+;; enforce higher precedence than regular symbols
+(
+ (symbol) @variable.special
+ (#match? @variable.special "^\\*.+\\*$")
+ )
+
+;; fbound symbols from the COMMON-LISP package generated by misc/symbols.lisp
+
+(
+ (symbol) @function.builtin
+ (#any-of? @function.builtin
+  "lognor" "compiler-macro-function" "integer-length" "provide" "load-logical-pathname-translations" "set-syntax-from-char" "file-write-date" "cddddr" "set" "subseq" "sleep" "invoke-restart-interactively" "plusp" "intern" "char>=" "logical-pathname" "make-load-form" "union" "remprop" "logbitp" "mask-field" "catch" "arithmetic-error-operation" "logandc2" "macrolet" "logandc1" "acosh" "nunion" "allocate-instance" "caaddr" "cdar" "fdefinition" "*" "+" "pathname-type" "fourth" "-" "/" "upgraded-complex-part-type" "make-random-state" "list*" "tailp" "ensure-directories-exist" "rationalize" "cdadr" "export" "delete-file" "zerop" "compute-restarts" "hash-table-p" "arrayp" "<" "=" "function" ">" "pathname-host" "typep" "ldiff" "use-package" "prin1" "dribble" "boole" "unintern" "peek-char" "truename" "require" "null" "package-used-by-list" "string/=" "subst" "use-value" "count-if-not" "string-capitalize" "initialize-instance" "pathname-device" "row-major-aref" "intersection" "tree-equal" "mapcar" "char-equal" "listp" "restart-name" "abort" "mapcan" "read-preserving-whitespace" "bit-xor" "position-if" "gcd" "apropos" "shadow" "stable-sort" "get-universal-time" "hash-table-size" "tan" "bit-nand" "package-error-package" "reduce" "princ-to-string" "compile" "type-error-datum" "stream-external-format" "/=" "nsubstitute-if-not" "make-pathname" "string-right-trim" "make-instances-obsolete" "seventh" "host-namestring" "maplist" "alphanumericp" "bit-ior" "macroexpand-1" "lognand" "symbol-function" "evenp" "sublis" "nsublis" "y-or-n-p" "identity" "software-type" "streamp" "phase" "remove-if" "shared-initialize" "abs" "remove" "go" "sin" "cddr" "remove-if-not" "apply" "machine-type" "char<" "nthcdr" "char=" "array-displacement" "char>" "make-symbol" "slot-missing" "pprint-linear" "cdaaar" "yes-or-no-p" "char-lessp" "invoke-debugger" "rationalp" "short-site-name" "1+" "realp" "1-" "prin1-to-string" "mapcon" "package-shadowing-symbols" "exp" "input-stream-p" "close" "make-instance" "pprint" "characterp" "conjugate" "concatenated-stream-streams" "cdddar" "atan" "signum" "char/=" "labels" "endp" "array-rank" "get-internal-real-time" "shadowing-import" "readtable-case" "char-not-equal" "make-list" "eighth" "find-restart" "min" "read-byte" "ed" "clear-output" "documentation" "clear-input" "find-method" "multiple-value-call" "search" "substitute-if" "fill-pointer" "translate-pathname" "random" "tagbody" "member" "eq" "caadar" "char-downcase" "asin" "write-byte" "third" "char-greaterp" "make-string-output-stream" "copy-list" "cadadr" "bit" "write-to-string" "no-next-method" "equal" "simple-bit-vector-p" "proclaim" "array-in-bounds-p" "stringp" "both-case-p" "float-radix" "expt" "caaar" "type-error-expected-type" "logeqv" "pprint-tabular" "remhash" "nbutlast" "describe" "rplaca" "slot-unbound" "reverse" "subsetp" "string=" "rplacd" "copy-tree" "string<" "lcm" "mod" "string>" "rest" "delete" "pathname-directory" "force-output" "add-method" "cddar" "first" "inspect" "set-difference" "change-class" "nset-difference" "invoke-restart" "copy-readtable" "member-if-not" "open" "finish-output" "vector-push-extend" "nth" "every" "copy-symbol" "char-code" "unbound-slot-instance" "rename-package" "bit-andc2" "dpb" "cdaddr" "bit-andc1" "unuse-package" "floatp" "make-two-way-stream" "values-list" "make-array" "get-macro-character" "car" "integerp" "make-sequence" "echo-stream-input-stream" "file-author" "wild-pathname-p" "multiple-value-prog1" "character" "reinitialize-instance" "numerator" "apropos-list" "find" "vector-pop" "floor" "tenth" "pathnamep" "block" "ffloor" "bit-and" "notevery" "make-load-form-saving-slots" "symbolp" "string-lessp" "nsubst-if-not" "coerce" "hash-table-rehash-threshold" "sxhash" "symbol-package" "gentemp" "get" "list" "setq" "read-char-no-hang" "nset-exclusive-or" "special-operator-p" "svref" "if" "caadr" "update-instance-for-redefined-class" "merge" "the" "fceiling" "pathname-version" "rassoc-if-not" "complex" "logcount" "store-value" "string-trim" "break" "readtablep" "cell-error-name" "byte-position" "read-line" "nsubst" "cdddr" "funcall" "arithmetic-error-operands" "denominator" "realpart" "boundp" "pathname-name" "packagep" "throw" "stream-error-stream" "probe-file" "pprint-indent" "interactive-stream-p" "tanh" "vector" "fill" "string-equal" "compile-file" "namestring" "logxor" "no-applicable-method" "random-state-p" "float-precision" "string-not-equal" "second" "cadaar" "cdr" "symbol-value" "logior" "rem" "pprint-dispatch" "nsubstitute-if" "scale-float" "read-delimited-list" "make-hash-table" "concatenate" "compile-file-pathname" "ldb" "symbol-name" "lower-case-p" "decode-universal-time" "macroexpand" "two-way-stream-input-stream" "get-output-stream-string" "encode-universal-time" "imagpart" "simple-string-p" "standard-char-p" "functionp" "delete-if" "find-class" "print-object" "progn" "terpri" "simple-vector-p" "substitute" "eval-when" "enough-namestring" "numberp" "string-upcase" "ninth" "progv" "position" "adjust-array" "directory" "broadcast-stream-streams" "quote" "copy-seq" "import" "lisp-implementation-version" "subtypep" "flet" "translate-logical-pathname" "unread-char" "minusp" "get-setf-expansion" "pprint-tab" "deposit-field" "char-name" "cdadar" "adjoin" "alpha-char-p" "echo-stream-output-stream" "print-not-readable-object" "equalp" "symbol-macrolet" "muffle-warning" "atanh" "cddadr" "let" "mapc" "vectorp" "aref" "float-sign" "nstring-upcase" "substitute-if-not" "array-dimension" "string-left-trim" "mapl" "adjustable-array-p" "file-position" "vector-push" "synonym-stream-symbol" "string-downcase" "hash-table-count" "file-length" "compute-applicable-methods" "name-char" "macro-function" "code-char" "copy-structure" "simple-condition-format-control" "count-if" "parse-integer" "string" "package-use-list" "caaadr" "caar" "remove-duplicates" "length" "return-from" "round" "ensure-generic-function" "upper-case-p" "method-qualifiers" "read" "constantly" "set-dispatch-macro-character" "slot-boundp" "describe-object" "values" "constantp" "make-string" "get-properties" "fround" "elt" "sbit" "cadddr" "notany" "nsubst-if" "compiled-function-p" "find-symbol" "logorc2" "replace" "string-not-lessp" "integer-decode-float" "signal" "copy-pprint-dispatch" "logorc1" "rename-file" "atom" "rassoc-if" "merge-pathnames" "delete-package" "function-lambda-expression" "cadar" "load" "revappend" "listen" "keywordp" "gethash" "clrhash" "make-broadcast-stream" "bit-orc2" "lisp-implementation-type" "cons" "last" "isqrt" "bit-orc1" "write" "write-char" "make-condition" "assoc-if" "oddp" "bit-vector-p" "directory-namestring" "make-echo-stream" "two-way-stream-output-stream" "pairlis" "stream-element-type" "fmakunbound" "map-into" "copy-alist" "logical-pathname-translations" "read-char" "class-of" "make-string-input-stream" "let*" "sqrt" "complement" "file-error-pathname" "char-not-greaterp" "make-package" "cis" "array-dimensions" "makunbound" "class-name" "rassoc" "assoc" "char-upcase" "get-decoded-time" "disassemble" "graphic-char-p" "upgraded-array-element-type" "logand" "byte" "char-int" "nconc" "pathname-match-p" "list-length" "cadr" "long-site-name" "count" "array-has-fill-pointer-p" "string-not-greaterp" "package-nicknames" "file-namestring" "string-greaterp" "machine-version" "schar" "warn" "find-if-not" "byte-size" "symbol-plist" "gensym" "read-from-string" "set-macro-character" "eval" "mismatch" "get-dispatch-macro-character" "sinh" "write-line" "slot-makunbound" "pprint-fill" "acons" "hash-table-rehash-size" "continue" "find-if" "<=" "append" "decode-float" "caddr" "position-if-not" "subst-if" "cddaar" "cos" "bit-eqv" "update-instance-for-different-class" "unwind-protect" "software-version" "read-sequence" "hash-table-test" "set-exclusive-or" "fboundp" "write-sequence" "fresh-line" "package-name" "log" "cerror" "make-dispatch-macro-character" "nstring-capitalize" "nreconc" "getf" "nintersection" "butlast" "error" "rational" "caaaar" "nreverse" "sixth" "delete-if-not" "some" "ceiling" "string<=" "map" "float-digits" "remove-method" "parse-namestring" "output-stream-p" "pathname" "assoc-if-not" "eql" "unexport" "bit-not" "array-row-major-index" "simple-condition-format-arguments" "bit-nor" "slot-exists-p" "max" "ldb-test" "make-concatenated-stream" "char" "machine-instance" "get-internal-run-time" "caddar" "consp" "maphash" "nstring-downcase" "logtest" "list-all-packages" ">=" "complexp" "subst-if-not" "char<=" "cosh" "room" "array-element-type" "write-string" "user-homedir-pathname" "float" "load-time-value" "asinh" "acos" "ash" "set-pprint-dispatch" "cdaar" "digit-char-p" "delete-duplicates" "princ" "char-not-lessp" "nsubstitute" "method-combination-error" "sort" "pprint-newline" "file-string-length" "type-of" "print" "make-synonym-stream" "not" "digit-char" "array-total-size" "function-keywords" "invalid-method-error" "ftruncate" "truncate" "slot-value" "cdaadr" "fifth" "string>=" "format" "find-package" "open-stream-p" "lognot" "member-if" "find-all-symbols" "slot-value" "slot-makunbound" "reinitialize-instance" "ensure-generic-function-using-class" "generic-function-methods" "finalize-inheritance" "extract-specializer-names" "no-applicable-method" "slot-definition-initfunction" "generic-function-name" "slot-boundp" "class-direct-default-initargs" "method-qualifiers" "slot-definition-location" "compute-applicable-methods-using-classes" "generic-function-method-combination" "make-load-form" "ensure-generic-function" "effective-slot-definition-class" "slot-unbound" "method-generic-function" "class-of" "accessor-method-slot-definition" "class-direct-slots" "reader-method-class" "find-class" "documentation" "map-dependents" "make-instance" "slot-missing" "remove-dependent" "slot-definition-writers" "slot-definition-readers" "change-class" "slot-definition-initargs" "class-direct-superclasses" "extract-lambda-list" "update-instance-for-redefined-class" "method-combination-error" "print-object" "update-dependent" "allocate-instance" "update-instance-for-different-class" "set-funcallable-instance-function" "class-slots" "compute-slots" "class-prototype" "compute-effective-method" "invalid-method-error" "compute-effective-slot-definition-initargs" "specializer-direct-methods" "no-primary-method" "find-method-combination" "remove-direct-method" "compute-applicable-methods" "class-name" "standard-instance-access" "initialize-instance" "method-function" "slot-boundp-using-class" "slot-value-using-class" "slot-definition-initform" "slot-exists-p" "compute-effective-slot-definition" "method-call-error-generic-function" "slot-definition-type" "method-specializers" "class-finalized-p" "function-keywords" "slot-definition-allocation" "intern-eql-specializer" "compute-discriminating-function" "method-call-error-argument-list" "writer-method-class" "add-dependent" "find-method" "describe-object" "validate-superclass" "specializer-direct-generic-functions" "add-method" "compute-class-precedence-list" "remove-direct-subclass" "funcallable-standard-instance-access" "make-load-form-saving-slots" "generic-function-method-class" "compute-effective-method-as-function" "method-call-error-method" "ensure-class-using-class" "direct-slot-definition-class" "no-next-method" "remove-method" "generic-function-declarations" "generic-function-argument-precedence-order" "class-direct-subclasses" "compute-default-initargs" "shared-initialize" "class-precedence-list" "slot-makunbound-using-class" "compute-direct-slot-definition-initargs" "ensure-class" "slot-definition-name" "class-default-initargs" "method-lambda-list" "add-direct-method" "add-direct-subclass" "generic-function-lambda-list" "make-instances-obsolete" "eql-specializer-object"
+  )
+ )
+
+(
+ (symbol) @macro.builtin
+ (#any-of? @macro.builtin
+  "declare" "dolist" "with-hash-table-iterator" "defsetf" "multiple-value-bind" "define-setf-expander" "declaim" "unless" "do-all-symbols" "restart-bind" "prog" "define-compiler-macro" "print-unreadable-object" "defvar" "trace" "ccase" "pprint-logical-block" "with-condition-restarts" "return" "loop" "with-compilation-unit" "do*" "remf" "do" "locally" "case" "do-symbols" "formatter" "in-package" "time" "define-symbol-macro" "with-standard-io-syntax" "loop-finish" "defpackage" "psetf" "setf" "assert" "with-input-from-string" "psetq" "restart-case" "defstruct" "nth-value" "handler-case" "push" "incf" "shiftf" "with-accessors" "or" "with-open-stream" "define-method-combination" "deftype" "prog*" "pushnew" "prog1" "defgeneric" "prog2" "untrace" "multiple-value-list" "when" "defmacro" "defconstant" "call-method" "cond" "multiple-value-setq" "and" "with-open-file" "step" "defun" "define-condition" "with-output-to-string" "pop" "with-simple-restart" "destructuring-bind" "defparameter" "defclass" "decf" "define-modify-macro" "ecase" "lambda" "handler-bind" "with-package-iterator" "with-slots" "ctypecase" "defmethod" "make-method" "typecase" "check-type" "ignore-errors" "etypecase" "rotatef" "dotimes" "do-external-symbols" "with-accessors" "defclass" "defmethod" "make-method" "define-method-combination" "defgeneric" "clos-warning" "generic-labels" "with-slots" "generic-flet" "call-method"
+ )
+ )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; quoted forms
+
+;; defined last to have high precedence
+
+;; generated by query-gen.lisp
+
+(quote (symbol) @variable)
+(quote (list (symbol) @variable))
+(quote (list (list (symbol) @variable)))
+(quote (list (list (list (symbol) @variable))))
+(quote (list (list (list (list (symbol) @variable)))))
+(quote (list (list (list (list (list (symbol) @variable))))))
+(quote (list (list (list (list (list (list (symbol) @variable)))))))
+(quote (list (list (list (list (list (list (list (symbol) @variable))))))))
+(quote (list (list (list (list (list (list (list (list (symbol) @variable)))))))))
+(quote (list (list (list (list (list (list (list (list (list (symbol) @variable))))))))))
+(backquote (symbol) @variable)
+(backquote (list (symbol) @variable))
+(backquote (list (list (symbol) @variable)))
+(backquote (list (list (list (symbol) @variable))))
+(backquote (list (list (list (list (symbol) @variable)))))
+(backquote (list (list (list (list (list (symbol) @variable))))))
+(backquote (list (list (list (list (list (list (symbol) @variable)))))))
+(backquote (list (list (list (list (list (list (list (symbol) @variable))))))))
+(backquote (list (list (list (list (list (list (list (list (symbol) @variable)))))))))
+(backquote (list (list (list (list (list (list (list (list (list (symbol) @variable))))))))))
