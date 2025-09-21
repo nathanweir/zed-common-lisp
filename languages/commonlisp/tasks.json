@@ -1,0 +1,12 @@
+[
+  {
+    "label": "Eval Expression",
+    "command": "echo 123",
+    "args": [],
+    "tags": ["eval-expression"],
+    "reveal": "no_focus",
+    "hide": "never",
+    "show_summary": false,
+    "show_command": false
+  }
+]

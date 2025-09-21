@@ -9,6 +9,13 @@
 
 (in-package :syntax-test)
 
+(+ 1 2)
+
+(defun do-thing ()
+	(* 2 3))
+
+(do-thing)
+
 ;;; Global variables and constants
 (defvar *global-counter* 0 "A global counter variable")
 (defparameter *debug-mode* t "Debug mode flag")
@@ -246,6 +253,8 @@
 (defmethod initialize-instance :after ((obj test-class) &key)
   (format t "Created instance of test-class~%"))
 
+(define-hash-table-test)
+
 ;;; Main demonstration function
 (defun main-function ()
   "Main function demonstrating all features"
@@ -276,6 +285,8 @@
               :point point
               :counter-value (funcall counter 5)
               :timing timing)))))
+
+
 
 ;;; Compile-time computations
 (eval-when (:compile-toplevel :load-toplevel :execute)
