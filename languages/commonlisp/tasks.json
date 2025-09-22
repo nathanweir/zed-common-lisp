@@ -1,9 +1,25 @@
 [
   {
-    "label": "Eval Expression",
-    "command": "echo 123",
+    "label": "Eval expression",
+    "command": "/home/nathan/dev/cl-micros-lsp/client eval-expr '$ZED_CUSTOM_CL_EVAL_EXPRESSION'",
     "args": [],
-    "tags": ["eval-expression"],
+    "tags": ["cl-eval-expression"],
+    "reveal": "no_focus",
+    "hide": "never",
+    "show_summary": false,
+    "show_command": false
+  },
+  {
+    "label": "Compile and load file",
+    "command": "/home/nathan/dev/cl-micros-lsp/client compile-and-load-file $ZED_FILE",
+    "reveal": "no_focus",
+    "hide": "never",
+    "show_summary": false,
+    "show_command": false
+  },
+  {
+    "label": "Load system with ASDF",
+    "command": "/home/nathan/dev/cl-micros-lsp/client load-system $ZED_DIRNAME $ZED_FILE",
     "reveal": "no_focus",
     "hide": "never",
     "show_summary": false,

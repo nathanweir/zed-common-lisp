@@ -17,7 +17,8 @@
       (flet)
       (macrolet)
       (in_package)
-    ] @run @_eval-expression
+      (list)
+    ] @run @CL_EVAL_EXPRESSION
   )
-  (#set! tag eval-expression)
+  (#set! tag cl-eval-expression)
 )
