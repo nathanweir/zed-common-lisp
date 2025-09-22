@@ -1,8 +1,8 @@
-(sym_lit) @variable
+; (sym_lit) @variable
 
 ; A highlighting for functions/macros in th cl namespace is available in theHamsta/nvim-treesitter-commonlisp
-;(list_lit . (sym_lit) @function.builtin (#cl-standard-function? @function.builtin))
-;(list_lit . (sym_lit) @function.builtin (#cl-standard-macro? @function.macro))
+;(list_lit . (sym_lit) @function (#cl-standard-function? @function))
+;(list_lit . (sym_lit) @function (#cl-standard-macro? @function.macro))
 (dis_expr) @comment
 
 (defun_keyword) @function.macro
@@ -12,7 +12,7 @@
 
 (defun_header
   lambda_list: (list_lit
-    (sym_lit) @variable.parameter))
+    (sym_lit) @variable))
 
 (defun_header
   keyword: (defun_keyword
@@ -28,18 +28,23 @@
   lambda_list: (list_lit
     (list_lit
       .
-      (sym_lit) @variable.parameter
+      (sym_lit) @variable
       .
       (_))))
 
 (defun_header
   specifier: (sym_lit) @string.special.symbol)
 
+; [
+;   ":"
+;   "::"
+;   "."
+; ] @punctuation.special
+
 [
   ":"
-  "::"
-  "."
-] @punctuation.special
+  (kwd_symbol)
+] @string.special.symbol
 
 [
   (accumulation_verb)
@@ -96,16 +101,16 @@
 ((sym_lit) @boolean
   (#any-of? @boolean "t" "T"))
 
-(nil_lit) @constant.builtin
+(nil_lit) @constant
 
-(comment) @comment @spell
+(comment) @comment
 
 ; dynamic variables
-((sym_lit) @variable.builtin
-  (#lua-match? @variable.builtin "^[*].+[*]$"))
+; ((sym_lit) @variable.builtin
+;   (#lua-match? @variable.builtin "^[*].+[*]$"))
 
 ; quote
-(format_specifier) @string.escape
+(format_specifier) @string.format
 
 (quoting_lit
   "'" @string.escape)
@@ -162,8 +167,8 @@
     "time" "restart-case" "prog*" "define-method-combination" "optimize"))
 
 ; constant
-((sym_lit) @constant
-  (#lua-match? @constant "^[+].+[+]$"))
+; ((sym_lit) @constant
+;   (#lua-match? @constant "^[+].+[+]$"))
 
 (var_quoting_lit
   marker: "#'" @string.special.symbol
@@ -177,9 +182,9 @@
 
 (list_lit
   .
-  (sym_lit) @function.builtin
+  (sym_lit) @function
   ; Generated via https://github.com/theHamsta/nvim-treesitter-commonlisp/blob/22fdc9fd6ed594176cc7299cc6f68dd21c94c63b/scripts/generate-symbols.lisp#L1-L21
-  (#any-of? @function.builtin
+  (#any-of? @function
     "apropos-list" "subst" "substitute" "pprint-linear" "file-namestring" "write-char" "do*"
     "slot-exists-p" "file-author" "macro-function" "rassoc" "make-echo-stream"
     "arithmetic-error-operation" "position-if-not" "list" "cdadr" "lisp-implementation-type"
@@ -303,8 +308,8 @@
   (sym_lit) @operator
   (#match? @operator "^([+*-+=<>]|<=|>=|/=)$"))
 
-((sym_lit) @string.special.symbol
-  (#lua-match? @string.special.symbol "^[&]"))
+; ((sym_lit) @string.special.symbol
+;   (#lua-match? @string.special.symbol "^[&]"))
 
 [
   (array_dimension)
@@ -312,8 +317,8 @@
   "#0a"
 ] @number
 
-(char_lit) @character
+(char_lit) @string
 
 ;; extends
-(list_lit . (sym_lit) @function.builtin (#cl-standard-function? @function.builtin))
-(list_lit . (sym_lit) @function.macro (#cl-standard-macro? @function.macro))
+; (list_lit . (sym_lit) @function (#cl-standard-function? @function))
+; (list_lit . (sym_lit) @function.macro (#cl-standard-macro? @function.macro))
