@@ -1,0 +1,60 @@
+#!/bin/sh
+#|-*- mode:lisp -*-|#
+#|
+exec ros -Q -- $0 "$@"
+|#
+
+;; Minimal error handling: short message, optional short backtrace, then exit.
+#+sbcl
+(progn
+  (defun minimal-error-hook (c h)
+    (declare (ignore h))
+    (format *error-output* "~&[ERROR] ~A~%" c)
+    ;; Optional: limit the backtrace to 10 frames (remove if you want none).
+    (ignore-errors (sb-debug:backtrace 10))
+    (uiop:quit 1))
+  ;; Important: do NOT call sb-ext:disable-debugger here, or SBCL will
+  ;; print its own long backtrace and bypass your minimal output. 【1】
+  (setf *debugger-hook* #'minimal-error-hook))
+
+(progn ;; init forms
+  (ros:ensure-asdf)
+  ;; Catch any error from ASDF loading/compilation with a concise message.
+  (handler-bind ((serious-condition
+                  (lambda (c)
+                    (format *error-output* "~&[ERROR] ~A~%" c)
+                    #+sbcl (ignore-errors (sb-debug:backtrace 10))
+                    (uiop:quit 1))))
+    (asdf:load-asd "/home/nathan/dev/zed-common-lisp/cl-formatter/cl-formatter.asd")
+    (asdf:load-system :cl-formatter))
+  #+quicklisp (ql:quickload '() :silent t))
+
+(defpackage :ros.script.cl-micros-lsp.3967236556
+  (:use :cl))
+(in-package :ros.script.cl-micros-lsp.3967236556)
+
+(defun main (&rest argv)
+  ;; Keep runtime errors concise too.
+  (handler-bind ((serious-condition
+                  (lambda (c)
+                    (format *error-output* "~&[ERROR] ~A~%" c)
+                    #+sbcl (ignore-errors (sb-debug:backtrace 10))
+                    (uiop:quit 1))))
+    (cl-formatter:main (first argv))))
+    ;; (let (( "stdio")
+    ;;       (port 7888)
+    ;;       (log-file nil))
+    ;;   ;; Parse flags: --stdio, --tcp, --port <n>, --log-file <path>
+    ;;   (loop for i from 0 below (length argv)
+    ;;         do (let ((arg (nth i argv)))
+    ;;              (cond
+    ;;                ((string= arg "--stdio") (setf mode "stdio"))
+    ;;                ((string= arg "--tcp") (setf mode "tcp"))
+    ;;                ((string= arg "--port")
+    ;;                 (when (< (1+ i) (length argv))
+    ;;                   (setf port (parse-integer (nth (1+ i) argv)))))
+    ;;                ((string= arg "--log-file")
+    ;;                 (when (< (1+ i) (length argv))
+    ;;                   (setf log-file (nth (1+ i) argv)))))))
+    ;;   (cl-micros-lsp:main mode port log-file))))
+;;; vim: set ft=lisp lisp:

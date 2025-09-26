@@ -1,0 +1,28 @@
+# Common Lisp build artifacts
+*.fasl
+*.x86f
+*.dx86f
+*.lx86f
+*.fx86f
+*.sse2f
+*.o
+*.so
+*.dylib
+*.dll
+
+# Quicklisp local projects
+quicklisp/
+
+# Qlot local dependencies
+local-projects/
+.qlot
+qlot/
+
+# TODO: Isn't the .ros file significant and need checked in?
+# Roswell artifacts
+# *.ros
+
+*.log
+
+# Omitting some specific binaries
+ros/cl-formatter

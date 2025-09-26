@@ -1,0 +1,8 @@
+build:
+    make
+
+run:
+    ./ros/cl-formatter "tests/test1.lisp"
+
+clean:
+    make clean
