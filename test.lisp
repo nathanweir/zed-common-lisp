@@ -199,6 +199,8 @@
     (setf (aref 2d-array 1 1) 42)
     (setf (aref vector 0) 99)
 
+    (format t "string-array is: ~A~%" string-array)
+
     ;; Sequence operations
     (list :vector vector
           :2d-array 2d-array

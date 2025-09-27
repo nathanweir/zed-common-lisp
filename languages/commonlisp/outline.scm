@@ -1,56 +1,40 @@
-;; Functions
-; (defun
-;   (fn_name) @name
-;   (documentation)? @annotation
-; ) @item
+;; Outline query for Common Lisp
 
-; ;; Macros
-; (defmacro
-;   (_symbol) @name
-;   (documentation)? @annotation
-; ) @item
+;; Match top-level function definitions
+(defun_header
+  function_name: (_) ) @name @item
 
-; (defmethod
-;   (fn_name) @name
-;   (documentation)? @annotation
-; ) @item
+;; Match top-level macro definitions
+; (defun_header
+;   keyword: (defun_keyword
+;     "defmacro")
+;   function_name: (_) ) @name @item
 
-; (defgeneric
-;   (fn_name) @name
-;   (documentation)? @annotation
-; ) @item
+;; Match top-level class definitions
+(list_lit
+  .
+  (sym_lit) @context
+  (#eq? @context "defclass")
+  .
+  (sym_lit) @name)  @item
+  (#strip! @item "^\(")
 
-; ;; Variables/constants
-; (defvar
-;   (_symbol) @name
-;   (documentation)? @annotation
-; ) @item
+;; Match top-level package definitions
+; (list_lit
+;   value: (sym_lit) @item
+;   .
+;   value: (kwd_lit) @name)
 
-; (defparameter
-;   (_symbol) @name
-;   (documentation)? @annotation
-; ) @item
-
-; (defconstant
-;   (_symbol) @name
-;   (documentation)? @annotation
-; ) @item
-
-; ;; Classes and slots
-; (defclass
-;   (_symbol) @name
-;   (superclass_list) @context
-;   (slot_list
-;     (slot
-;       (symbol) @context.extra
-;     )*
-;   )
-;   (documentation)? @annotation
-; ) @item
-
-; ;; Package definitions
-; (list
-;   (symbol) @_defpackage
-;   (_symbol) @name
-;   (#eq? @_defpackage "defpackage")
-; ) @item
+;; Match other top-level constructs
+(source
+  (list_lit
+    .
+    (
+    (sym_lit) @context)
+    (#any-of? @context
+        "defvar"
+        "defparameter"
+        "defconstant")
+    .
+    (sym_lit) @name) @item)
+    (#strip! @item "^\(")
