@@ -12,7 +12,11 @@
 (+ 1 2)
 
 (defun do-thing ()
-	(* 2 3))
+  (* 2 3))
+
+(defun whatever ()
+  (* 1 2 3 4))
+
 
 (do-thing)
 
@@ -25,7 +29,7 @@
 (defmacro when-debug (&body body)
   "Execute body only when debug mode is enabled"
   `(when *debug-mode*
-     ,@body))
+         ,@body))
 
 (defmacro with-timing ((var) &body body)
   "Time the execution of body"
@@ -62,19 +66,19 @@
 
 ;;; Classes and structures
 (defclass geometric-shape ()
-  ((name :initarg :name
-         :accessor shape-name
-         :type string
-         :documentation "Name of the shape")
-   (color :initarg :color
-          :accessor shape-color
-          :initform "white"))
+    ((name :initarg :name
+           :accessor shape-name
+           :type string
+           :documentation "Name of the shape")
+     (color :initarg :color
+            :accessor shape-color
+            :initform "white"))
   (:documentation "Base class for geometric shapes"))
 
 (defclass circle (geometric-shape)
-  ((radius :initarg :radius
-           :accessor circle-radius
-           :type number))
+    ((radius :initarg :radius
+             :accessor circle-radius
+             :type number))
   (:default-initargs :name "Circle"))
 
 (defstruct point
@@ -89,30 +93,30 @@
 
 (defmethod print-object ((circle circle) stream)
   (format stream "#<CIRCLE :name ~A :radius ~A :color ~A>"
-          (shape-name circle)
-          (circle-radius circle)
-          (shape-color circle)))
+    (shape-name circle)
+    (circle-radius circle)
+    (shape-color circle)))
 
 ;;; Conditions and error handling
 (define-condition invalid-input-error (error)
-  ((input :initarg :input :reader invalid-input))
+    ((input :initarg :input :reader invalid-input))
   (:report (lambda (condition stream)
              (format stream "Invalid input: ~A"
-                     (invalid-input condition)))))
+               (invalid-input condition)))))
 
 (defun safe-divide (a b)
   "Safely divide two numbers with error handling"
   (handler-case
       (progn
-        (when (zerop b)
-          (error 'invalid-input-error :input b))
-        (/ a b))
+       (when (zerop b)
+             (error 'invalid-input-error :input b))
+       (/ a b))
     (division-by-zero ()
-      (format t "Division by zero detected~%")
-      nil)
+                      (format t "Division by zero detected~%")
+                      nil)
     (invalid-input-error (e)
-      (format t "Error: ~A~%" e)
-      nil)))
+                         (format t "Error: ~A~%" e)
+                         nil)))
 
 ;;; Advanced control structures
 (defun demonstrate-loops ()
@@ -121,10 +125,10 @@
     ;; LOOP macro with various clauses
     (loop for i from 1 to 10
           for j = (* i i)
-          when (evenp i)
-            collect j into evens
-          when (oddp i)
-            collect j into odds
+            when (evenp i)
+          collect j into evens
+            when (oddp i)
+          collect j into odds
           finally (return (list :evens evens :odds odds)))
 
     ;; DO loop
@@ -154,17 +158,17 @@
   "Demonstrate higher-order functions"
   (let ((numbers '(1 2 3 4 5 6 7 8 9 10)))
     (values
-     ;; MAP functions
-     (mapcar #'(lambda (x) (* x x)) numbers)
-     (mapcan #'(lambda (x) (when (evenp x) (list x))) numbers)
+      ;; MAP functions
+      (mapcar #'(lambda (x) (* x x)) numbers)
+      (mapcan #'(lambda (x) (when (evenp x) (list x))) numbers)
 
-     ;; REDUCE
-     (reduce #'+ numbers)
-     (reduce #'max numbers)
+      ;; REDUCE
+      (reduce #'+ numbers)
+      (reduce #'max numbers)
 
-     ;; REMOVE-IF and FIND-IF
-     (remove-if #'oddp numbers)
-     (find-if #'(lambda (x) (> x 5)) numbers))))
+      ;; REMOVE-IF and FIND-IF
+      (remove-if #'oddp numbers)
+      (find-if #'(lambda (x) (> x 5)) numbers))))
 
 ;;; Multiple values and destructuring
 (defun multiple-values-demo ()
@@ -213,8 +217,8 @@
   "Hash table operations"
   (let ((ht (make-hash-table :test 'equal)))
     (setf (gethash "key1" ht) "value1"
-          (gethash "key2" ht) "value2"
-          (gethash 42 ht) "numeric-key")
+      (gethash "key2" ht) "value2"
+      (gethash 42 ht) "numeric-key")
 
     (maphash #'(lambda (k v)
                  (format t "~A -> ~A~%" k v))
@@ -247,10 +251,10 @@
 
 ;;; CLOS advanced features
 (defclass test-class ()
-  ((slot1 :allocation :class
-          :initform "class-allocated")
-   (slot2 :allocation :instance
-          :accessor test-slot2)))
+    ((slot1 :allocation :class
+            :initform "class-allocated")
+     (slot2 :allocation :instance
+            :accessor test-slot2)))
 
 (defmethod initialize-instance :after ((obj test-class) &key)
   (format t "Created instance of test-class~%"))
@@ -289,12 +293,11 @@
               :timing timing)))))
 
 
-
 ;;; Compile-time computations
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defconstant +compile-time-constant+
-    (factorial 5)
-    "Computed at compile time"))
+               (factorial 5)
+               "Computed at compile time"))
 
 #|
 Block comment demonstrating
