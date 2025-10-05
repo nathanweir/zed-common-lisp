@@ -1,7 +1,7 @@
 [
   {
     "label": "Eval expression",
-    "command": "./languages/commonlisp/run-eval.sh",
+    "command": "/home/nathan/dev/zed-common-lisp/languages/commonlisp/run-eval.sh",
     "args": [],
     "tags": ["cl-eval-expression"],
     "reveal": "no_focus",
