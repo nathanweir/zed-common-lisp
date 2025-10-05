@@ -1,7 +1,7 @@
 [
   {
     "label": "Eval expression",
-    "command": "/home/nathan/dev/alive-lsp/ros/alive-client '$ZED_CUSTOM_CL_EVAL_EXPRESSION'",
+    "command": "./languages/commonlisp/run-eval.sh",
     "args": [],
     "tags": ["cl-eval-expression"],
     "reveal": "no_focus",

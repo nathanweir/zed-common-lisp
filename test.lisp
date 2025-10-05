@@ -11,15 +11,21 @@
 
 (+ 1 2)
 
+
 (defun do-thing ()
+    "some doc text"
     (* 2 3))
+
+(do-thing)
+
+(documentation 'do-thing 'function)
 
 (defun whatever ()
     (* 1 2 3 4))
 
 
 (+ 1 2)
-`
+
 (whatever)
 
 (do-thing)
